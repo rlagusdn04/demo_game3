@@ -1,0 +1,32 @@
+{
+    "npcs": [
+      {
+        "x": 8,
+        "y": 5,
+        "sprite": "npc1.png",
+        "name": "John"
+      },
+      {
+        "x": 12,
+        "y": 10,
+        "sprite": "npc2.png",
+        "name": "Leah",
+        "dialogue": [
+          {
+            "text": "Hello, I'm Leah.",
+            "responses": [
+              {
+                "text": "Hi, I'm {player.name}.",
+                "next": 1
+              }
+            ]
+          },
+          {
+            "text": "Nice to meet you, {player.name}.",
+            "responses": []
+          }
+        ]
+      }
+    ]
+  }
+  
