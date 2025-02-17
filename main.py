@@ -16,14 +16,14 @@ def main():
     clock = pygame.time.Clock()
 
     # 플레이어 데이터 로드 (player.json)
-    player = Player.load("player.json")
+    player = Player.load("data/player.json")
     print(f"Loaded player: {player.x}, {player.y}")
 
     # 맵 데이터 로드 (map.json)
-    current_map = Map.load("data\map.json")
+    current_map = Map.load("data/map.json")
 
     # NPC 데이터 로드 (npc.json)
-    npcs = load_npcs("npc.json")
+    npcs = load_npcs("data/npc.json")
 
     # UI 초기화 (플레이어 정보 표시 등)
     ui = UI(player)
