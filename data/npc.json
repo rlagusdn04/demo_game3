@@ -3,14 +3,16 @@
       {
         "x": 8,
         "y": 5,
-        "sprite": "npc1.png",
-        "name": "John"
+        "sprite": "assets/npc1.png",
+        "name": "Ive",
+        "map_name": "village"
       },
       {
         "x": 12,
         "y": 10,
-        "sprite": "npc2.png",
+        "sprite": "assets/npc2.png",
         "name": "Leah",
+        "map_name": "village",
         "dialogue": [
           {
             "text": "Hello, I'm Leah.",
