@@ -3,6 +3,20 @@ import pygame
 
 TILE_SIZE = 32  
 
+class SpriteSheet:
+    def __init__(self, file_path, scale_factor=2):
+        self.sheet = pygame.image.load(file_path)
+        self.scale_factor = scale_factor
+
+    def get_image(self, x, y, width, height):
+        image = pygame.Surface((width, height), pygame.SRCALPHA)
+        image.blit(self.sheet, (0, 0), (x, y, width, height))
+        if self.scale_factor != 1:
+            new_width = int(width * self.scale_factor)
+            new_height = int(height * self.scale_factor)
+            image = pygame.transform.scale(image, (new_width, new_height))
+        return image
+
 class Map:
     current_map = None  # 현재 활성화된 맵
 
@@ -20,6 +34,7 @@ class Map:
             self.triggers = triggers or []
             self.properties = properties or {}
             self.collision_tiles = [1]  # 충돌 타일 ID 예시
+            self.sprite_sheet = SpriteSheet("assets/tiles.png")
 
     def load(self, filename):
         with open(filename, "r") as f:
@@ -71,7 +86,8 @@ class Map:
         for y, row in enumerate(self.tiles):
             for x, tile_id in enumerate(row):
                 tile_image = self.get_tile_image(tile_id)
-                screen.blit(tile_image, ((x - camera_x) * TILE_SIZE, (y - camera_y) * TILE_SIZE))
+                # 스프라이트 시트에서 불러온 이미지 크기와 화면 타일 크기가 다를 경우 위치 조정 필요
+                screen.blit(tile_image , ((x - camera_x) * TILE_SIZE, (y - camera_y) * TILE_SIZE))
         
         # 객체 그리기 (예: 아이템, NPC 등)
         for obj in self.objects:
@@ -79,7 +95,6 @@ class Map:
             obj_x = obj.get("x")
             obj_y = obj.get("y")
             color = (0, 0, 255) if obj_type == "item" else (255, 0, 0)
-            # 카메라 오프셋 적용
             rect = pygame.Rect((obj_x - camera_x) * TILE_SIZE, (obj_y - camera_y) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
             pygame.draw.rect(screen, color, rect)
         
@@ -87,7 +102,6 @@ class Map:
         for trigger in self.triggers:
             trigger_x = trigger.get("x")
             trigger_y = trigger.get("y")
-            # 카메라 오프셋 적용
             rect = pygame.Rect((trigger_x - camera_x) * TILE_SIZE, (trigger_y - camera_y) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
             pygame.draw.rect(screen, (0, 255, 0), rect, 2)
 
@@ -102,16 +116,24 @@ class Map:
             return self.tiles[y][x]
         return None
 
-    @staticmethod
-    def get_tile_image(tile_id):
-        surface = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        if tile_id == 0:
-            surface.fill((100, 100, 100))  # 바닥 타일
-        elif tile_id == 1:
-            surface.fill((0, 0, 0))        # 충돌 타일(벽)
+    def get_tile_image(self, tile_id):
+        """
+        tile_id 에 따라 스프라이트 시트에서 해당 타일 이미지를 추출합니다.
+        여기서는 예시로 tile_id 0은 (0, 0), 1은 (TILE_SIZE, 0)에서 타일을 가져옵니다.
+        """
+        tile_mapping = {
+            0: (0, 0, TILE_SIZE, TILE_SIZE),                   # 예: 바닥 타일
+            1: (TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)              # 예: 충돌 타일(벽)
+            # 추가 타일 ID와 좌표를 매핑할 수 있습니다.
+        }
+        if tile_id in tile_mapping:
+            x, y, width, height = tile_mapping[tile_id]
+            return self.sprite_sheet.get_image(x, y, width, height)
         else:
-            surface.fill((150, 150, 150))
-        return surface
+            # 정의되지 않은 타일 ID는 기본 Surface를 반환합니다.
+            default_image = pygame.Surface((TILE_SIZE, TILE_SIZE))
+            default_image.fill((150, 150, 150))
+            return default_image
 
     def check_collision_rect(self, rect):
         """

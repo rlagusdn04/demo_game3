@@ -3,6 +3,7 @@ from modules.map import Map
 from modules.npc import NPCManager
 from modules.player import Player, TILE_SIZE
 from modules.ui import UI
+from modules.config import Config, ParallaxBackground, Music
 
 screen_width = 800
 screen_height = 600
@@ -14,7 +15,7 @@ def main():
 
     clock = pygame.time.Clock()
 
-    # 맵, NPC, 플레이어, UI 초기화
+    # 맵, NPC, 플레이어, UI 객체 생성 및 로드
     map_manager = Map()
     map_manager.load("data/map.json")
     current_map = Map.get_current_map()
@@ -27,6 +28,47 @@ def main():
     player.load("data/player.json")
 
     ui = UI(player)
+
+    # 환경설정 객체 생성
+    config = Config()
+    config.load("data/config.json")
+    parallax_bg = ParallaxBackground("assets/layers", scale=1.0, min_factor=0.3, max_factor=1.0)
+    music = Music("data/music/")
+
+    def SceneManager():
+        # 튜토리얼 진행
+        if config.tutorial_enabled:
+            # 튜토리얼 타이머가 없다면 초기화
+            if not hasattr(config, "tutorial_timer"):
+                config.tutorial_timer = 0
+                music.play(2)
+                print("튜토리얼 시작")
+            
+            config.on_field = False
+            # offset 업데이트: 시간에 따라 배경이 움직이도록 함
+            parallax_bg.update(dt)
+            parallax_bg.draw(screen) 
+            config.tutorial_timer += dt 
+                
+            pygame.display.flip()  # 튜토리얼 화면 업데이트
+
+            # 누적 시간이 10초(10000ms) 이상이면 튜토리얼 종료
+            if config.tutorial_timer >= 20000:
+                config.tutorial = False
+                config.on_field = True
+                music.stop()
+                config.tutorial_timer = 0  # 타이머 리셋
+
+        elif config.on_field_enabled:
+            # 게임 플레이 상태: 맵, NPC, 플레이어, UI 그리기
+            Map.draw_current_map(screen, ui)
+            for npc in npcs_on_map:
+                npc.draw(screen, ui)
+            player.draw(screen, ui)
+            
+            ui.draw_ui(screen)
+            pygame.display.flip()
+
 
     running = True
     while running:
@@ -62,15 +104,8 @@ def main():
         # 화면 초기화
         screen.fill((0, 0, 0))
 
-        # 카메라 오프셋을 이용해 월드를 그리기
-        Map.draw_current_map(screen, ui)  
-        for npc in npcs_on_map:
-            npc.draw(screen, ui)         
-        player.draw(screen, ui)             
 
-        # UI는 월드 위에 고정된 좌표로 그리기 (카메라 오프셋 미적용)
-        ui.draw_ui(screen)
-        pygame.display.flip()
+        SceneManager()
 
     player.save("data/player.json")
     pygame.quit()

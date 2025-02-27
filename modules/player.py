@@ -1,5 +1,6 @@
 import pygame
 import json
+import math
 
 TILE_SIZE = 32  # 타일 크기
 

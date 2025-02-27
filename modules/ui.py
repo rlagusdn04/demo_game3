@@ -44,3 +44,7 @@ class UI:
 
     def dialogue(self, screen):
         pass
+
+import os
+import pygame
+
