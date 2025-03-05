@@ -39,12 +39,10 @@ def main():
         # 튜토리얼 진행
         if config.tutorial_enabled and player.name == "Player":
             config.on_field = False
-            music.play(2)
-            parallax_bg.update(dt)
-            parallax_bg.draw(screen)
+            music.play(3)
             
             # 닉네임 입력 UI: 엔터를 눌러 이름이 입력되면 함수가 반환됨
-            ui.name_input(screen)
+            ui.name_input(screen, parallax_bg)
             
             # 이름 입력 완료 후 튜토리얼 종료 처리
             config.tutorial_enabled = False

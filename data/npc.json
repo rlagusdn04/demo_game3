@@ -1,15 +1,15 @@
 {
     "npcs": [
       {
-        "x": 8,
-        "y": 5,
+        "x": 24,
+        "y": 18,
         "sprite": "assets/npc1.png",
         "name": "Ive",
         "map_name": "village"
       },
       {
-        "x": 12,
-        "y": 10,
+        "x": 20,
+        "y": 12,
         "sprite": "assets/npc2.png",
         "name": "Leah",
         "map_name": "village",

@@ -1,4 +1,5 @@
 import pygame
+import time
 import json
 import os
 
@@ -101,18 +102,24 @@ class Music:
         self.download_path = download_path
         # 음악 번호와 파일 이름을 매핑하는 사전
         self.music_files = {
-            1: "water.mp3",
-            2: "Heart.mp3",
+            1: "watercity.mp3", # 배경 1
+            2: "Heart.mp3", # 엔딩
+            3: "Triste.mp3", # 튜토
+            4: "뚱땅뚱땅.mp3", # 
+            5: "La nuit.mp3", # 호수
+            6: "Time to Start Another Day.mp3", # 주점
             # 필요한 만큼 추가
         }
 
     def play(self, music_num):
+
         filename = self.music_files.get(music_num)
         if not filename:
             print(f"음악 번호 {music_num}에 해당하는 파일이 없습니다.")
             return
 
         file_path = os.path.join(self.download_path, filename)
+        time.sleep(1)  # 음악 재생 전 잠시 대기
         try:
             pygame.mixer.music.load(file_path)
             pygame.mixer.music.set_volume(self.volume)

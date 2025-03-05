@@ -49,22 +49,37 @@ class UI:
     def dialogue(self, screen):
         pass
 
-    def name_input(self, screen):
+    def name_input(self, screen, parallax_bg):
         input_active = True
         input_text = ""
+        focused = False  # 입력창 포커스 여부
         clock = pygame.time.Clock()
         
-        # 입력창 색상 설정 (투명도를 주기 위해 알파 채널 사용)
+        # 색상 설정
         box_color = (50, 50, 50, 180)      # 입력창 배경 (투명도 180)
         border_color = (200, 200, 200)      # 테두리 색상
-        text_color = (255, 255, 255)        # 텍스트 색상
+        text_color = (255, 255, 255)        # 입력 텍스트 색상
+        placeholder_color = (150, 150, 150) # 플레이스홀더 텍스트 색상
         
         while input_active:
+            # 입력창 위치와 크기 (화면 중앙)
+            box_width, box_height = 400, 50
+            box_x = (self.width - box_width) // 2
+            box_y = (self.height - box_height) // 1.5
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
-                if event.type == pygame.KEYDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # 입력창 내부 클릭 시 포커스 활성화
+                    if box_x <= event.pos[0] <= box_x + box_width and box_y <= event.pos[1] <= box_y + box_height:
+                        if not focused:
+                            input_text = ""  # 최초 클릭 시 플레이스홀더 삭제
+                        focused = True
+                    else:
+                        focused = False  # 입력창 외부 클릭 시 포커스 해제
+                if event.type == pygame.KEYDOWN and focused:
                     if event.key == pygame.K_RETURN:
                         self.player.name = input_text.strip() if input_text.strip() != "" else "Player"
                         input_active = False
@@ -73,31 +88,31 @@ class UI:
                     else:
                         input_text += event.unicode
 
-            # 기존 배경 유지: 화면 전체를 지우지 않고 현재 화면 위에 입력창 UI만 오버레이함
-            # screen.fill(bg_color) 호출 제거
-            
-            # 입력창 위치와 크기 (화면 중앙)
-            box_width, box_height = 400, 50
-            box_x = (self.width - box_width) // 2
-            box_y = (self.height - box_height) // 2
+            # 배경 레이어 업데이트 및 그리기
+            parallax_bg.update(clock.get_time())
+            parallax_bg.draw(screen)
             
             # 투명 배경을 가진 입력창 surface 생성
             input_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
             input_surface.fill(box_color)
-            
-            # 입력창 surface를 화면에 블릿
             screen.blit(input_surface, (box_x, box_y))
             pygame.draw.rect(screen, border_color, (box_x, box_y, box_width, box_height), 2)
             
-            # 입력된 텍스트 그리기
-            text_surface = self.font.render(input_text, True, text_color)
+            # 블링크 커서: 현재 시간에 따라 깜박임 효과 (500ms 주기)
+            current_time = pygame.time.get_ticks()
+            blink = (current_time // 500) % 2 == 0
+            
+            # 입력 상태에 따라 표시할 텍스트 결정
+            if focused:
+                display_text = input_text + ("|" if blink else "")
+            else:
+                display_text = input_text if input_text != "" else "Enter your name"
+            
+            # 플레이스홀더 색상 적용: 포커스가 없고 아직 입력이 없을 때
+            render_color = text_color if focused or input_text != "" else placeholder_color
+            text_surface = self.font.render(display_text, True, render_color)
             screen.blit(text_surface, (box_x + 10, box_y + 10))
-            
-            # 안내 문구 표시
-            prompt = "Enter your name:"
-            prompt_surface = self.font.render(prompt, True, text_color)
-            prompt_rect = prompt_surface.get_rect(center=(self.width / 2, box_y - 20))
-            screen.blit(prompt_surface, prompt_rect)
-            
+
             pygame.display.flip()
             clock.tick(30)
+
