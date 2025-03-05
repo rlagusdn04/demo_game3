@@ -37,38 +37,33 @@ def main():
 
     def SceneManager():
         # 튜토리얼 진행
-        if config.tutorial_enabled:
-            # 튜토리얼 타이머가 없다면 초기화
-            if not hasattr(config, "tutorial_timer"):
-                config.tutorial_timer = 0
-                music.play(2)
-                print("튜토리얼 시작")
-            
+        if config.tutorial_enabled and player.name == "Player":
             config.on_field = False
-            # offset 업데이트: 시간에 따라 배경이 움직이도록 함
+            music.play(2)
             parallax_bg.update(dt)
-            parallax_bg.draw(screen) 
-            config.tutorial_timer += dt 
-                
-            pygame.display.flip()  # 튜토리얼 화면 업데이트
+            parallax_bg.draw(screen)
+            
+            # 닉네임 입력 UI: 엔터를 눌러 이름이 입력되면 함수가 반환됨
+            ui.name_input(screen)
+            
+            # 이름 입력 완료 후 튜토리얼 종료 처리
+            config.tutorial_enabled = False
+            config.on_field_enabled = True
+            music.stop()
+            
+            pygame.display.flip()
 
-            # 누적 시간이 10초(10000ms) 이상이면 튜토리얼 종료
-            if config.tutorial_timer >= 20000:
-                config.tutorial = False
-                config.on_field = True
-                music.stop()
-                config.tutorial_timer = 0  # 타이머 리셋
-
+        # 온 필드 상태
         elif config.on_field_enabled:
-            # 게임 플레이 상태: 맵, NPC, 플레이어, UI 그리기
+            if not music.is_playing():
+                music.play(1)
             Map.draw_current_map(screen, ui)
+            npcs_on_map = npc_manager.get_npcs(current_map)
             for npc in npcs_on_map:
                 npc.draw(screen, ui)
             player.draw(screen, ui)
-            
             ui.draw_ui(screen)
             pygame.display.flip()
-
 
     running = True
     while running:
@@ -78,23 +73,23 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_e:
-                    npcs_here = npc_manager.get_npcs(current_map)
-                    if npcs_here:
-                        dialogue = npcs_here[0].get_dialogue()
-                        if dialogue:
-                            print(f"{npcs_here[0].name} 대화: {dialogue}")
+                    npcs_on_map = npc_manager.get_npcs(current_map)
+                    npc_collision = player.check_collision_npc(npcs_on_map)
+                    if npc_collision:
+                        npc_manager.interact(npc_collision, ui)
 
         # 키 입력에 따른 플레이어 이동 (WASD)
         keys = pygame.key.get_pressed()
         npcs_on_map = npc_manager.get_npcs(current_map)
+        
         if keys[pygame.K_w]:
-            player.move(0, -1, current_map, npcs_on_map)
+            player.move(0, -1, current_map, npcs_on_map, ui)
         elif keys[pygame.K_s]:
-            player.move(0, 1, current_map, npcs_on_map)
+            player.move(0, 1, current_map, npcs_on_map, ui)
         elif keys[pygame.K_a]:
-            player.move(-1, 0, current_map, npcs_on_map)
+            player.move(-1, 0, current_map, npcs_on_map, ui)
         elif keys[pygame.K_d]:
-            player.move(1, 0, current_map, npcs_on_map)
+            player.move(1, 0, current_map, npcs_on_map, ui)
 
         player.animator.update(dt)
 
@@ -104,7 +99,7 @@ def main():
         # 화면 초기화
         screen.fill((0, 0, 0))
 
-
+        # 씬 진행
         SceneManager()
 
     player.save("data/player.json")

@@ -1,6 +1,6 @@
 {
     "tutorial": {
-        "enabled": false,
+        "enabled": true,
         "steps": [
             {
                 "step": 1,

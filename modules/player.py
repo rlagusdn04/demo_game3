@@ -47,6 +47,7 @@ class Player:
         self.exp = exp
         self.money = money
         self.inventory = inventory if inventory is not None else []  # 인벤토리는 아이템 목록
+        self.hitbox = None
 
         # 충돌 판정을 위한 히트박스 크기 (여기서는 TILE_SIZE로 설정)
         self.width = TILE_SIZE
@@ -117,32 +118,43 @@ class Player:
         current_image = self.animator.get_current_image()
         screen.blit(current_image, ((self.x - camera_x) * TILE_SIZE, (self.y - camera_y) * TILE_SIZE))
 
-    def move(self, dx, dy, game_map, npcs):
+    def move(self, dx, dy, game_map, npcs, ui):
         speed = 0.2
         new_x = self.x + dx * speed
         new_y = self.y + dy * speed
 
+
         # 새로운 위치를 기반으로 픽셀 단위의 플레이어 히트박스 생성 (약간의 오프셋 및 크기 조절)
-        new_hitbox = pygame.Rect(
+        self.hitbox = pygame.Rect(
             int(new_x * TILE_SIZE) + 5,
             int(new_y * TILE_SIZE) + 15,
             self.width + 20,
             self.height + 10
         )
-        # 맵 충돌 검사: 히트박스 내의 타일 중 하나라도 충돌 타일이면 이동 취소
-        if game_map.check_collision_rect(new_hitbox):
-            return
 
-        # NPC와의 충돌 검사 (히트박스 기반)
-        for npc in npcs:
-            # NPC 객체는 get_hitbox() 메서드를 통해 자신의 히트박스를 반환합니다.
-            if npc.get_hitbox().colliderect(new_hitbox):
-                print(f"상호작용: {npc.name}")
-                return
+        if self.check_collision_map(game_map):
+            return
+        
+        if self.check_collision_npc(npcs):
+            return
 
         self.x = new_x
         self.y = new_y
 
+    # 충돌 검사
+    def check_collision_map(self,game_map):
+         # 맵 충돌 검사: 히트박스 내의 타일 중 하나라도 충돌 타일이면 이동 취소
+        if game_map.check_collision_rect(self.hitbox):
+            return True
+        return False
+        
+    def check_collision_npc(self, npcs):
+        # NPC와의 충돌 검사 (히트박스 기반)
+        for npc in npcs:
+            # NPC 객체는 get_hitbox() 메서드를 통해 자신의 히트박스를 반환합니다.
+            if npc.get_hitbox().colliderect(self.hitbox):
+                return npc
+        return False
 
     def load(self, filename):
         try:

@@ -1,4 +1,5 @@
 import pygame
+import os
 
 TILE_SIZE = 32
 
@@ -35,6 +36,9 @@ class UI:
         self.camera_x += (target_x - self.camera_x) * lerp_factor
         self.camera_y += (target_y - self.camera_y) * lerp_factor
 
+    def show_dialogue(self, dialogue):
+        print(dialogue)
+        pass
         
     def inventory(self, screen):
         pass
@@ -45,6 +49,55 @@ class UI:
     def dialogue(self, screen):
         pass
 
-import os
-import pygame
+    def name_input(self, screen):
+        input_active = True
+        input_text = ""
+        clock = pygame.time.Clock()
+        
+        # 입력창 색상 설정 (투명도를 주기 위해 알파 채널 사용)
+        box_color = (50, 50, 50, 180)      # 입력창 배경 (투명도 180)
+        border_color = (200, 200, 200)      # 테두리 색상
+        text_color = (255, 255, 255)        # 텍스트 색상
+        
+        while input_active:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.player.name = input_text.strip() if input_text.strip() != "" else "Player"
+                        input_active = False
+                    elif event.key == pygame.K_BACKSPACE:
+                        input_text = input_text[:-1]
+                    else:
+                        input_text += event.unicode
 
+            # 기존 배경 유지: 화면 전체를 지우지 않고 현재 화면 위에 입력창 UI만 오버레이함
+            # screen.fill(bg_color) 호출 제거
+            
+            # 입력창 위치와 크기 (화면 중앙)
+            box_width, box_height = 400, 50
+            box_x = (self.width - box_width) // 2
+            box_y = (self.height - box_height) // 2
+            
+            # 투명 배경을 가진 입력창 surface 생성
+            input_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+            input_surface.fill(box_color)
+            
+            # 입력창 surface를 화면에 블릿
+            screen.blit(input_surface, (box_x, box_y))
+            pygame.draw.rect(screen, border_color, (box_x, box_y, box_width, box_height), 2)
+            
+            # 입력된 텍스트 그리기
+            text_surface = self.font.render(input_text, True, text_color)
+            screen.blit(text_surface, (box_x + 10, box_y + 10))
+            
+            # 안내 문구 표시
+            prompt = "Enter your name:"
+            prompt_surface = self.font.render(prompt, True, text_color)
+            prompt_rect = prompt_surface.get_rect(center=(self.width / 2, box_y - 20))
+            screen.blit(prompt_surface, prompt_rect)
+            
+            pygame.display.flip()
+            clock.tick(30)

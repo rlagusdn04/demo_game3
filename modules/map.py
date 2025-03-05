@@ -122,8 +122,9 @@ class Map:
         여기서는 예시로 tile_id 0은 (0, 0), 1은 (TILE_SIZE, 0)에서 타일을 가져옵니다.
         """
         tile_mapping = {
-            0: (0, 0, TILE_SIZE, TILE_SIZE),                   # 예: 바닥 타일
-            1: (TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)              # 예: 충돌 타일(벽)
+            0: (0, 0, TILE_SIZE, TILE_SIZE),                   # 풀 타일
+            1: (TILE_SIZE, TILE_SIZE, TILE_SIZE/2, TILE_SIZE/2),            # 물 타일
+            2: (TILE_SIZE, 0, TILE_SIZE/2, TILE_SIZE/2)
             # 추가 타일 ID와 좌표를 매핑할 수 있습니다.
         }
         if tile_id in tile_mapping:

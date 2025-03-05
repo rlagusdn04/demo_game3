@@ -20,6 +20,8 @@ class NPC:
         self.name = name
         self.map_name = map_name  # NPC가 속한 맵 이름 저장
         self.dialogue = dialogue if dialogue is not None else []
+        self.index = 0  # 대화 인덱스
+        
 
     def get_hitbox(self):
         """
@@ -37,10 +39,19 @@ class NPC:
         hitbox = pygame.Rect((self.x - camera_x) * TILE_SIZE, (self.y - camera_y) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
         pygame.draw.rect(screen, (255, 0, 0), hitbox, 2)
 
-    def get_dialogue(self, index=0):
-        if self.dialogue and 0 <= index < len(self.dialogue):
-            return self.dialogue[index]
+    def get_dialogue(self):
+        if self.dialogue and 0 <= self.index < len(self.dialogue):
+            text = self.dialogue[self.index].get("text")
+            self.index += 1
+            if self.index >= len(self.dialogue):
+                self.index = 0
+            return text
         return None
+    
+    def show_dialogue(self, ui):
+        ui.show_dialogue(self.get_dialogue())
+
+
 
 class NPCManager:
     def __init__(self):
@@ -83,3 +94,6 @@ class NPCManager:
             if npc.get_hitbox().colliderect(player_hitbox):
                 return npc
         return None
+
+    def interact(self, npc ,ui):
+        npc.show_dialogue(ui)

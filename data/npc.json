@@ -15,10 +15,10 @@
         "map_name": "village",
         "dialogue": [
           {
-            "text": "Hello, I'm Leah.",
+            "text": "Hello, world",
             "responses": [
               {
-                "text": "Hi, I'm {player.name}.",
+                "text": "Hi",
                 "next": 1
               }
             ]

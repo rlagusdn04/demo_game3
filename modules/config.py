@@ -120,6 +120,9 @@ class Music:
             pygame.mixer.music.play(-1)
         except Exception as e:
             print(f"음악 재생 중 오류 발생: {e}")
+    
+    def is_playing(self):
+        return pygame.mixer.music.get_busy()
 
     def stop(self):
         pygame.mixer.music.stop()
