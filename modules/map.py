@@ -114,6 +114,16 @@ class Map:
         if cls.current_map:
             cls.current_map.draw(screen, ui)
 
+
+    def change_map(self, map_name, start_position=None):
+        if map_name in self.maps:
+            Map.set_current_map(self.maps[map_name])
+            print("맵 변경:", map_name)
+
+            # 플레이어 위치를 start_position으로 이동
+        else:
+            print(f"[Error] 맵 '{map_name}'을 찾을 수 없습니다.")
+
     def draw(self, screen, ui):
         camera_x, camera_y = ui.camera_x, ui.camera_y
         
@@ -210,3 +220,16 @@ class Map:
                 if tile_id in self.collision_tiles:
                     return True
         return False
+    
+    #트리거 영역 관리
+
+    #트리거 이벤트 처리
+    def trigger_event(self, trigger):
+        event_type = trigger.get("event")
+        if event_type == "change_map":
+            map_name = trigger.get("target_map")
+            start_position = trigger.get("start_pos")
+            self.change_map(map_name, start_position)
+        else:
+            print(f"[Warning] 알 수 없는 트리거 이벤트: {event_type}")
+        

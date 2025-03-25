@@ -137,6 +137,10 @@ class Player:
         
         if self.check_collision_npc(npcs):
             return
+        
+        if self.check_collision_trigger(game_map.triggers):
+            game_map.trigger_event(self.check_collision_trigger(game_map.triggers))
+            return
 
         self.x = new_x
         self.y = new_y
@@ -154,6 +158,17 @@ class Player:
             # NPC 객체는 get_hitbox() 메서드를 통해 자신의 히트박스를 반환합니다.
             if npc.get_hitbox().colliderect(self.hitbox):
                 return npc
+        return False
+    
+    def check_collision_trigger(self, triggers):
+        # 트리거와의 충돌 검사 (히트박스 기반)
+        # 현재 맵의 충돌한 트리거를 반환
+        for trigger in triggers:
+            trigger_x = trigger.get("x")
+            trigger_y = trigger.get("y")
+            trigger_rect = pygame.Rect(trigger_x * TILE_SIZE, trigger_y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+            if trigger_rect.colliderect(self.hitbox):
+                return trigger
         return False
 
     def load(self, filename):
