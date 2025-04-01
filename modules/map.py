@@ -230,6 +230,7 @@ class Map:
             map_name = trigger.get("target_map")
             start_position = trigger.get("start_pos")
             self.change_map(map_name, start_position)
+            return start_position # 플레이어 위치 변경을 위해 start_position 반환
         else:
             print(f"[Warning] 알 수 없는 트리거 이벤트: {event_type}")
         

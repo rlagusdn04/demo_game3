@@ -139,11 +139,17 @@ class Player:
             return
         
         if self.check_collision_trigger(game_map.triggers):
-            game_map.trigger_event(self.check_collision_trigger(game_map.triggers))
+            pos = game_map.trigger_event(self.check_collision_trigger(game_map.triggers))
+            self.set_player_position(pos[0], pos[1])
             return
 
         self.x = new_x
         self.y = new_y
+
+    #플레이어 위치 변경
+    def set_player_position(self, x, y):
+        self.x = x
+        self.y = y
 
     # 충돌 검사
     def check_collision_map(self,game_map):
